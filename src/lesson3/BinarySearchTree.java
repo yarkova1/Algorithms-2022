@@ -98,12 +98,85 @@ public class BinarySearchTree<T extends Comparable<T>> extends AbstractSet<T> im
      * Спецификация: {@link Set#remove(Object)} (Ctrl+Click по remove)
      *
      * Средняя
+     *
+     * Трудоемкость: O(log n)
+     * Ресурсоемкость: O(1)
+     *
      */
     @Override
     public boolean remove(Object o) {
-        // TODO
-        throw new NotImplementedError();
+
+        Node<T> current = root;
+        Node<T> parent = root;
+
+        T remove_element = (T) o;
+
+        if (remove_element == null || root == null)
+            return false;
+
+        boolean check_left = true;
+
+        while (current.value != remove_element) {
+            parent = current;
+            if (remove_element.compareTo(current.value) < 0) {
+                current = current.left;
+                check_left = true;
+            }
+            else {
+                check_left = false;
+                current = current.right;
+            }
+
+            if (current == null)
+                return false;
+        }
+
+        //нет потомков
+        if (current.left == null && current.right == null) {
+            swap (current, parent, null, check_left);
+        }
+
+        //один потомок
+        else if (current.left == null) {
+            swap (current, parent, current.right, check_left);
+        }
+
+        else if (current.right == null) {
+            swap (current, parent, current.left, check_left);
+        }
+
+        //два потомка
+        else {
+            Node<T> x = current.right;
+            Node<T> parent_x = current;
+            while (x.left != null) {
+                parent_x = x;
+                x = x.left;
+            }
+
+            if (x != current.right) {
+                parent_x.left = x.right;
+                x.right = current.right;
+            }
+
+            x.left = current.left;
+
+            swap(current, parent, x, check_left);
+        }
+
+        size--;
+        return true;
     }
+
+    public void swap(Node<T> current, Node<T> parent, Node<T> swap_element, boolean check_left) {
+        if (current == root)
+            root = swap_element;
+        else if (check_left)
+            parent.left = swap_element;
+        else
+            parent.right = swap_element;
+    }
+
 
     @Nullable
     @Override
@@ -117,10 +190,20 @@ public class BinarySearchTree<T extends Comparable<T>> extends AbstractSet<T> im
         return new BinarySearchTreeIterator();
     }
 
-    public class BinarySearchTreeIterator implements Iterator<T> {
+    public class BinarySearchTreeIterator implements Iterator<T>, lesson3.BinarySearchTreeIterator {
+
+        private Node<T> node;
+        private final Stack<Node<T>> stack = new Stack<>();
+
+        private void pushLeft(Node<T> node){
+            while (node != null) {
+                stack.push(node);
+                node = node.left;
+            }
+        }
 
         private BinarySearchTreeIterator() {
-            // Добавьте сюда инициализацию, если она необходима.
+            pushLeft(root);
         }
 
         /**
@@ -132,11 +215,14 @@ public class BinarySearchTree<T extends Comparable<T>> extends AbstractSet<T> im
          * Спецификация: {@link Iterator#hasNext()} (Ctrl+Click по hasNext)
          *
          * Средняя
+         *
+         * Ресурсоемкость: О(1)
+         * Трудоемкость: О(1)
+         *
          */
         @Override
         public boolean hasNext() {
-            // TODO
-            throw new NotImplementedError();
+            return !stack.empty();
         }
 
         /**
@@ -151,11 +237,22 @@ public class BinarySearchTree<T extends Comparable<T>> extends AbstractSet<T> im
          * Спецификация: {@link Iterator#next()} (Ctrl+Click по next)
          *
          * Средняя
+         *
+         * Ресурсоемкость: О(1)
+         * Трудоемкость: О(1)
+         *
          */
         @Override
         public T next() {
-            // TODO
-            throw new NotImplementedError();
+            if (node == null)
+                throw new NoSuchElementException();
+            if (hasNext()) {
+                node = stack.pop();
+                pushLeft(node.right);
+            }
+            else
+                throw new NoSuchElementException();
+            return node.value;
         }
 
         /**
@@ -170,10 +267,11 @@ public class BinarySearchTree<T extends Comparable<T>> extends AbstractSet<T> im
          *
          * Сложная
          */
+
+
         @Override
         public void remove() {
-            // TODO
-            throw new NotImplementedError();
+            Iterator.super.remove();
         }
     }
 
