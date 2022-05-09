@@ -150,15 +150,13 @@ public class JavaAlgorithms {
 
         for (int i = 2; i * i < k; i++) {
             if (arr[i] == 0) {
-                for (int j = i * i; j < k; j += i) {
+                for (int j = i * i; j < k; j += i)
                     arr[j] = 1;
-                }
             }
         }
         for (int i = 2; i < k; i++) {
-            if (arr[i] == 0) {
+            if (arr[i] == 0)
                 count++;
-            }
         }
         return count;
     }

@@ -2,8 +2,7 @@ package lesson6;
 
 import kotlin.NotImplementedError;
 
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @SuppressWarnings("unused")
 public class JavaGraphTasks {
@@ -32,9 +31,50 @@ public class JavaGraphTasks {
      *
      * Справка: Эйлеров цикл -- это цикл, проходящий через все рёбра
      * связного графа ровно по одному разу
+     *
+     * Трудоемкость: O(vertices + edges)
+     * Ресурсоемкость: O(edges)
+     *
      */
     public static List<Graph.Edge> findEulerLoop(Graph graph) {
-        throw new NotImplementedError();
+        //проврерка на эйлеровость
+        for (Graph.Vertex vertex : graph.getVertices()) {
+            Set<Graph.Vertex> neighbours = graph.getNeighbors(vertex);
+            if (neighbours.size() == 0 || neighbours.size() % 2 != 0)
+                return Collections.emptyList();
+        }
+        // задаем первую вершину
+        Optional<Graph.Vertex> start = graph.getVertices().stream().findFirst();
+        if (start.isEmpty())
+            return Collections.emptyList();
+
+        Stack<Graph.Edge> loop = new Stack<>();
+        Set<Graph.Edge> traversedEdges = new HashSet<>();
+        // рекурсивная функция, которая ищет путь
+        eulerLoopDFS(start.get(), null, traversedEdges, loop, graph);
+        return loop;
+    }
+
+    private static Set<Graph.Vertex> neighboursForUntraveledEdges(Graph.Vertex vertex, Set<Graph.Edge> traversedEdges, Graph graph) {
+        Set<Graph.Vertex> neighbours = new HashSet<>();
+        for (Graph.Vertex neighbour : graph.getNeighbors(vertex)) {
+            Graph.Edge edgeToNeighbour = graph.getConnection(vertex, neighbour);
+            if (!traversedEdges.contains(edgeToNeighbour))
+                neighbours.add(neighbour);
+        }
+        return neighbours;
+    }
+
+    private static void eulerLoopDFS(Graph.Vertex vertex, Graph.Vertex wentFrom, Set<Graph.Edge> traversedEdges, Stack<Graph.Edge> loop, Graph graph) {
+        if (wentFrom != null)
+            traversedEdges.add(graph.getConnection(wentFrom, vertex));
+        Set<Graph.Vertex> neighbours;
+        while (!(neighbours = neighboursForUntraveledEdges(vertex, traversedEdges, graph)).isEmpty()) {
+            Graph.Vertex neighbour = neighbours.stream().findFirst().get();
+            eulerLoopDFS(neighbour, vertex, traversedEdges, loop, graph);
+        }
+        if (wentFrom != null)
+            loop.push(graph.getConnection(wentFrom, vertex));
     }
 
     /**
@@ -116,9 +156,35 @@ public class JavaGraphTasks {
      * J ------------ K
      *
      * Ответ: A, E, J, K, D, C, H, G, B, F, I
+     *
+     * Трудоемкость: O(!vertices)
+     * Ресурсоемкость: O(!vertices)
+     *
      */
     public static Path longestSimplePath(Graph graph) {
-        throw new NotImplementedError();
+        int max = -1;
+        Path path = new Path();
+        Deque<Path> deque = new ArrayDeque<>(); //все списки из одной вершины
+        for (Graph.Vertex vertex : graph.getVertices())
+            deque.add(new Path(vertex));
+        while (!deque.isEmpty()) {
+            Path current = deque.pollFirst();
+            if (current.toString().length() > max) {
+                max = current.getLength();
+                path = current;
+                if (max == graph.getVertices().size())
+                    break;
+            }
+            Iterator<Graph.Vertex> iter = current.getVertices().iterator();
+            Graph.Vertex last = iter.next();
+            while (iter.hasNext())
+                last = iter.next();
+            for (Graph.Vertex neighbour : graph.getNeighbors(last)) {
+                if (!current.contains(neighbour))
+                    deque.add(new Path(current, graph, neighbour));
+            }
+        }
+        return path;
     }
 
 

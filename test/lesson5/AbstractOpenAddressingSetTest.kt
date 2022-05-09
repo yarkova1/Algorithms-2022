@@ -41,6 +41,10 @@ abstract class AbstractOpenAddressingSetTest {
     }
 
     protected fun doRemoveTest() {
+        val controlSet1 = mutableSetOf<String>()
+        val toRemove1 = "l27f45"
+        assertFalse(controlSet1.remove(toRemove1))
+
         val random = Random()
         for (iteration in 1..100) {
             val bitsNumber = random.nextInt(4) + 6
@@ -122,6 +126,12 @@ abstract class AbstractOpenAddressingSetTest {
     }
 
     protected fun doIteratorRemoveTest() {
+        val controlSet1 = mutableSetOf("vf8ev9", "wd6xwd", "vev8e9", "r9n7rt6", "")
+        val toRemove1 = "wd6xwd"
+        val finalSet = mutableSetOf("vf8ev9", "vev8e9", "r9n7rt6", "")
+        controlSet1.remove(toRemove1)
+        assertEquals(controlSet1, finalSet)
+
         val random = Random()
         for (iteration in 1..100) {
             val controlSet = mutableSetOf<String>()

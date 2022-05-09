@@ -190,12 +190,13 @@ public class BinarySearchTree<T extends Comparable<T>> extends AbstractSet<T> im
         return new BinarySearchTreeIterator();
     }
 
-    public class BinarySearchTreeIterator implements Iterator<T>, lesson3.BinarySearchTreeIterator {
-
+    public class BinarySearchTreeIterator implements Iterator<T> {
         private Node<T> node;
         private final Stack<Node<T>> stack = new Stack<>();
+        private int count = 0;
+        private int nextCount = 0;
 
-        private void pushLeft(Node<T> node){
+        private void pushLeft(Node<T> node) {
             while (node != null) {
                 stack.push(node);
                 node = node.left;
@@ -208,70 +209,80 @@ public class BinarySearchTree<T extends Comparable<T>> extends AbstractSet<T> im
 
         /**
          * Проверка наличия следующего элемента
-         *
+         * <p>
          * Функция возвращает true, если итерация по множеству ещё не окончена (то есть, если вызов next() вернёт
          * следующий элемент множества, а не бросит исключение); иначе возвращает false.
-         *
+         * <p>
          * Спецификация: {@link Iterator#hasNext()} (Ctrl+Click по hasNext)
-         *
+         * <p>
          * Средняя
          *
-         * Ресурсоемкость: О(1)
-         * Трудоемкость: О(1)
+         * Трудоемкость: O(1)
+         * Ресурсоемкость: O(1)
          *
          */
         @Override
+        //T = O(1)
+        //R = O(1)
         public boolean hasNext() {
-            return !stack.empty();
+            return !stack.isEmpty();
         }
 
         /**
          * Получение следующего элемента
-         *
+         * <p>
          * Функция возвращает следующий элемент множества.
          * Так как BinarySearchTree реализует интерфейс SortedSet, последовательные
          * вызовы next() должны возвращать элементы в порядке возрастания.
-         *
+         * <p>
          * Бросает NoSuchElementException, если все элементы уже были возвращены.
-         *
+         * <p>
          * Спецификация: {@link Iterator#next()} (Ctrl+Click по next)
-         *
+         * <p>
          * Средняя
          *
-         * Ресурсоемкость: О(1)
-         * Трудоемкость: О(1)
+         * Трудоемкость: O(1)
+         * Ресурсоемкость: O(1)
          *
          */
         @Override
         public T next() {
-            if (node == null)
-                throw new NoSuchElementException();
+            nextCount++;
+            count = 0;
             if (hasNext()) {
                 node = stack.pop();
                 pushLeft(node.right);
-            }
-            else
-                throw new NoSuchElementException();
+            } else throw new NoSuchElementException();
+            if (node == null) throw new NoSuchElementException(); // если все элементы были возвращены
             return node.value;
         }
 
         /**
          * Удаление предыдущего элемента
-         *
+         * <p>
          * Функция удаляет из множества элемент, возвращённый крайним вызовом функции next().
-         *
+         * <p>
          * Бросает IllegalStateException, если функция была вызвана до первого вызова next() или же была вызвана
          * более одного раза после любого вызова next().
-         *
+         * <p>
          * Спецификация: {@link Iterator#remove()} (Ctrl+Click по remove)
-         *
+         * <p>
          * Сложная
+         *
+         * Трудоемкость: O(высота дерева). O(logN) в среднем случае, N - количество узлов. В худшем O(N)
+         * Ресурсоемкость: O(1)
          */
-
-
         @Override
+
         public void remove() {
-            Iterator.super.remove();
+            if (node == null) {
+                throw new IllegalStateException();
+            }
+            if (count == 0 && nextCount != 0) {
+                BinarySearchTree.this.remove(node.value);
+                count++;
+                node = null;
+            }
         }
     }
 
@@ -378,6 +389,4 @@ public class BinarySearchTree<T extends Comparable<T>> extends AbstractSet<T> im
         if (left != null && (left.value.compareTo(node.value) >= 0 || !checkInvariant(left))) return false;
         Node<T> right = node.right;
         return right == null || right.value.compareTo(node.value) > 0 && checkInvariant(right);
-    }
-
-}
+    }}

@@ -121,6 +121,26 @@ abstract class AbstractGraphTests {
         }.build()
         val loop3 = graph3.findEulerLoop()
         loop3.assert(shouldExist = false, graph = graph3)
+
+        val myGraph = GraphBuilder().apply {
+            val aa = addVertex("A")
+            val bb = addVertex("B")
+            val cc = addVertex("C")
+            val dd = addVertex("D")
+            val ee = addVertex("E")
+            val ff = addVertex("F")
+            val gg = addVertex("G")
+            addConnection(aa, bb)
+            addConnection(aa, cc)
+            addConnection(bb, dd)
+            addConnection(cc, dd)
+            addConnection(ee, dd)
+            addConnection(ee, gg)
+            addConnection(ff, dd)
+            addConnection(ff, gg)
+        }.build()
+        val myLoop = myGraph.findEulerLoop()
+        myLoop.assert(shouldExist = true, graph = myGraph)
     }
 
     fun minimumSpanningTree(minimumSpanningTree: Graph.() -> Graph) {
@@ -271,6 +291,26 @@ abstract class AbstractGraphTests {
         }.build()
         val longestNoEdgePath = noEdgeGraph.longestSimplePath()
         assertEquals(0, longestNoEdgePath.length)
+
+        val myGraph = GraphBuilder().apply {
+            val aa = addVertex("A")
+            val bb = addVertex("B")
+            val cc = addVertex("C")
+            val dd = addVertex("D")
+            val ee = addVertex("E")
+            val ff = addVertex("F")
+            val gg = addVertex("G")
+            addConnection(aa, bb)
+            addConnection(aa, cc)
+            addConnection(bb, dd)
+            addConnection(cc, dd)
+            addConnection(ee, dd)
+            addConnection(ee, gg)
+            addConnection(ff, dd)
+            addConnection(ff, gg)
+        }.build()
+        val myLongestPath = myGraph.longestSimplePath()
+        assertEquals(6, myLongestPath.length)
 
         val unconnected = GraphBuilder().apply {
             val a = addVertex("A")
